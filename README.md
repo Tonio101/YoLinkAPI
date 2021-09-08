@@ -39,17 +39,8 @@ Install python required modules:
 /usr/bin/python3 -m pip install -r requirements.txt
 ```
 
-Add the IoT device(s) serial number to `yolink_data.yml`.
-
-Execute the python script providing your YoLink account API keys:
+Add your credentials and the IoT device(s) serial number to `yolink_data.yml`.
 
 ```bash
-* Note: For mqtt_url arg, discard the "https://" in {SVR_URL}
-
-/usr/bin/python3 yolink.py --url {SVR_URL}/openApi \
-                           --mqtt_url {SVR_URL} \
-                           --mqtt_port 8003 \
-                           --csid {CSID} \
-                           --csseckey {CSSecKey} \
-                           --topic {CSName}/report 
+/usr/bin/python3 yolink.py --config yolink_data.yml
 ```

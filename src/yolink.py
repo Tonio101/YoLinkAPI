@@ -5,54 +5,64 @@ import os
 import sys
 import yaml
 
-from logger import getLogger
-from yolink_devices import YoLinkDevice
+from logger import Logger
+from logging import DEBUG
+from yolink_devices import YoLinkDeviceApi, YoLinkDoorDevice, \
+                           YoLinkTempDevice, DEVICE_TYPE, DeviceType
 from yolink_mqtt_client import YoLinkMQTTClient
-log = getLogger(__name__)
+log = Logger.getInstance().getLogger()
+
 
 def main(argv):
-
     usage = ("{FILE} "
-            "--url <API_URL> "
-            "--csid <ID> "
-            "--csseckey <SECKEY> "
-            "--mqtt_url <MQTT_URL> "
-            "--mqtt_port <MQTT_PORT> "
-            "--topic <MQTT_TOPIC>").format(FILE=__file__)
-
+             "--config <config_file.yml> "
+             "--debug").format(FILE=__file__)
     description = 'Enable Sensor APIs and subscribe to MQTT broker'
-
     parser = argparse.ArgumentParser(usage=usage, description=description)
 
-    parser.add_argument("-u", "--url",       help="Device API URL",    required=True)
-    parser.add_argument("-i", "--csid",      help="Unique Identifier", required=True)
-    parser.add_argument("-k", "--csseckey",  help="Security Key",      required=True)
-    parser.add_argument("-m", "--mqtt_url",  help="MQTT Server URL",   required=True)
-    parser.add_argument("-p", "--mqtt_port", help="MQTT Server Port",  required=True)
-    parser.add_argument("-t", "--topic",     help="Broker Topic",      required=True)
+    parser.add_argument("-c", "--config", help="Config File",
+                        required=True)
+    parser.add_argument("-d", "--debug", help="Debug",
+                        action='store_true', required=False)
+
+    parser.set_defaults(debug=False)
 
     args = parser.parse_args()
+
+    if args.debug:
+        log.setLevel(DEBUG)
+
     log.debug("{0}\n".format(args))
 
     device_hash = {}
     device_serial_numbers = []
 
-    with open(os.path.abspath('yolink_data.yml'), 'r') as fp:
+    with open(os.path.abspath(args.config), 'r') as fp:
         data = yaml.safe_load(fp)
         device_serial_numbers = data['DEVICE_SERIAL_NUMBERS']
 
+    yolink_api = YoLinkDeviceApi(data['API_URL'], data['CSID'],
+                                 data['CSSECKEY'])
+    yolink_device = None
+
     for serial_num in device_serial_numbers:
-        yolink_device = YoLinkDevice(args.url, args.csid, args.csseckey, serial_num)
-        yolink_device.build_device_api_request_data()
-        yolink_device.enable_device_api()
+        yolink_api.build_device_api_request_data(serial_number=serial_num)
+        device_data = yolink_api.enable_device_api()
+
+        if DEVICE_TYPE[device_data['type']] == DeviceType.DOOR:
+            yolink_device = YoLinkDoorDevice(device_data=device_data)
+        elif DEVICE_TYPE[device_data['type']] == DeviceType.TEMPERATURE:
+            yolink_device = YoLinkTempDevice(device_data=device_data)
 
         device_hash[yolink_device.get_id()] = yolink_device
 
     log.debug(device_hash)
 
-    yolink_client = YoLinkMQTTClient(args.csid, args.csseckey,
-            args.topic, args.mqtt_url, args.mqtt_port, device_hash)
+    yolink_client = YoLinkMQTTClient(data['CSID'], data['CSSECKEY'],
+                                     data['TOPIC'], data['MQTT_URL'],
+                                     data['MQTT_PORT'], device_hash)
     yolink_client.connect_to_broker()
+
 
 if __name__ == '__main__':
     main(sys.argv)

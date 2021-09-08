@@ -55,7 +55,7 @@ class YoLinkMQTTClient(object):
             self.device_hash[deviceId].update_device_event_payload(payload)
             log.debug(self.device_hash[deviceId])
         else:
-            log.debug("Device ID:{0} is not in device hash!")
+            log.debug("Device ID:{0} is not in device hash".format(deviceId))
 
     def on_connect(self, client, userdata, flags, rc):
         """

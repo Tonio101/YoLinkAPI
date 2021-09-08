@@ -4,15 +4,17 @@ import os
 import sys
 
 import paho.mqtt.client as mqtt
-from logger import getLogger
-log = getLogger(__name__)
+from logger import Logger
+log = Logger.getInstance().getLogger()
 
-"""
-Object representation for YoLink MQTT Client
-"""
+
 class YoLinkMQTTClient(object):
+    """
+    Object representation for YoLink MQTT Client
+    """
 
-    def __init__(self, csid, csseckey, topic, mqtt_url, mqtt_port, device_hash, client_id=os.getpid()):
+    def __init__(self, csid, csseckey, topic, mqtt_url, mqtt_port,
+                 device_hash, client_id=os.getpid()):
         self.csid = csid
         self.csseckey = csseckey
         self.topic = topic
@@ -21,11 +23,11 @@ class YoLinkMQTTClient(object):
         self.device_hash = device_hash
 
         self.client = mqtt.Client(client_id=str(__name__ + str(client_id)),
-                clean_session=True, userdata=None,
-                protocol=mqtt.MQTTv311, transport="tcp")
+                                  clean_session=True, userdata=None,
+                                  protocol=mqtt.MQTTv311, transport="tcp")
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
-        #self.client.tls_set()
+        # self.client.tls_set()
 
     def connect_to_broker(self):
         """
@@ -33,9 +35,10 @@ class YoLinkMQTTClient(object):
         """
         log.info("Connecting to broker...")
 
-        log.debug(hashlib.md5(self.csseckey.encode('utf-8')).hexdigest())
+        pwd = hashlib.md5(self.csseckey.encode('utf-8')).hexdigest()
+        log.debug(pwd)
         self.client.username_pw_set(username=self.csid,
-                password=hashlib.md5(self.csseckey.encode('utf-8')).hexdigest())
+                                    password=pwd)
 
         self.client.connect(self.mqtt_url, self.mqtt_port, 10)
         self.client.loop_forever()
@@ -44,18 +47,16 @@ class YoLinkMQTTClient(object):
         """
         Callback for broker published events
         """
-        log.debug(msg.topic, msg.payload)
-
         payload = json.loads(msg.payload.decode("utf-8"))
         log.debug(payload)
-    
-        event = payload['event']
-        deviceId = payload['deviceId']
-        state = payload['data']['state']
 
-        log.info("Event:{0} Device:{1} State:{2}".format(event,
-            self.device_hash[deviceId].get_name(), state))
-    
+        deviceId = payload['deviceId']
+        if deviceId in self.device_hash:
+            self.device_hash[deviceId].update_device_event_payload(payload)
+            log.debug(self.device_hash[deviceId])
+        else:
+            log.debug("Device ID:{0} is not in device hash!")
+
     def on_connect(self, client, userdata, flags, rc):
         """
         Callback for connection to broker
@@ -65,7 +66,7 @@ class YoLinkMQTTClient(object):
         if (rc == 0):
             log.info("Successfully connected to broker %s" % self.mqtt_url)
         else:
-            log.info("Connection with result code %s" % rc);
+            log.error("Connection with result code %s" % rc)
             sys.exit(2)
-    
+
         self.client.subscribe(self.topic)

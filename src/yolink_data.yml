@@ -1,4 +1,14 @@
 #
+# MQTT API Credentials
+#
+API_URL: SVR_URL
+MQTT_URL: SVR_URL # just the domain name
+MQTT_PORT: 8003
+CSID: CSID
+CSSECKEY: CSSecKey
+TOPIC: "CSName/report"
+
+#
 # Use a QR code scanner to get the serial number for each device.
 #
 DEVICE_SERIAL_NUMBERS:
@@ -13,4 +23,6 @@ DEVICE_SERIAL_NUMBERS:
   # Mail Box
   - DEADBEEF1234567890DEADBEEF123456
   # Test Sensor
+  - DEADBEEF1234567890DEADBEEF123456
+  # Backyard Temperature Sensor
   - DEADBEEF1234567890DEADBEEF123456

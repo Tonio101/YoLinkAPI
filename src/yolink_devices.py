@@ -13,7 +13,7 @@ log = Logger.getInstance().getLogger()
 class DeviceType(Enum):
     DOOR = 1
     TEMPERATURE = 2
-
+    LEAK = 3
 
 class TempType(Enum):
     CELSIUS = 1
@@ -28,7 +28,8 @@ class DoorEvent(Enum):
 
 DEVICE_TYPE = {
     "DoorSensor": DeviceType.DOOR,
-    "THSensor": DeviceType.TEMPERATURE
+    "THSensor": DeviceType.TEMPERATURE,
+    "LeakSensor": DeviceType.LEAK
 }
 
 EVENT_STATE = {
@@ -41,6 +42,7 @@ DEVICE_TYPE_TO_STR = {
     DeviceType.DOOR: "Door Sensor",
     DeviceType.TEMPERATURE: "Temperature Sensor"
 }
+
 
 class YoLinkDeviceApi(object):
     """

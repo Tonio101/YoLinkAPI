@@ -15,6 +15,7 @@ class DeviceType(Enum):
     TEMPERATURE = 2
     LEAK = 3
 
+
 class TempType(Enum):
     CELSIUS = 1
     FAHRENHEIT = 2
@@ -40,7 +41,8 @@ EVENT_STATE = {
 
 DEVICE_TYPE_TO_STR = {
     DeviceType.DOOR: "Door Sensor",
-    DeviceType.TEMPERATURE: "Temperature Sensor"
+    DeviceType.TEMPERATURE: "Temperature Sensor",
+    DeviceType.LEAK: "Leak Sensor"
 }
 
 

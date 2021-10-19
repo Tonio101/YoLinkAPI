@@ -7,7 +7,7 @@ import yaml
 
 from logger import Logger
 from logging import DEBUG
-from yolink_devices import YoLinkDeviceApi, YoLinkDoorDevice, \
+from yolink_devices import YoLinkDeviceApi, YoLinkDoorDevice, YoLinkLeakDevice, \
                            YoLinkTempDevice, DEVICE_TYPE, DeviceType
 from yolink_mqtt_client import YoLinkMQTTClient
 log = Logger.getInstance().getLogger()
@@ -49,10 +49,16 @@ def main(argv):
         yolink_api.build_device_api_request_data(serial_number=serial_num)
         device_data = yolink_api.enable_device_api()
 
-        if DEVICE_TYPE[device_data['type']] == DeviceType.DOOR:
+        type = DEVICE_TYPE[device_data['type']]
+
+        if type == DeviceType.DOOR:
             yolink_device = YoLinkDoorDevice(device_data=device_data)
-        elif DEVICE_TYPE[device_data['type']] == DeviceType.TEMPERATURE:
+        elif type == DeviceType.TEMPERATURE:
             yolink_device = YoLinkTempDevice(device_data=device_data)
+        elif type == DeviceType.LEAK:
+            yolink_device = YoLinkLeakDevice(device_data=device_data)
+        else:
+            raise NotImplementedError
 
         device_hash[yolink_device.get_id()] = yolink_device
 

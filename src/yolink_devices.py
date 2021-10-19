@@ -13,6 +13,7 @@ log = Logger.getInstance().getLogger()
 class DeviceType(Enum):
     DOOR = 1
     TEMPERATURE = 2
+    LEAK = 3
 
 
 class TempType(Enum):
@@ -28,7 +29,8 @@ class DoorEvent(Enum):
 
 DEVICE_TYPE = {
     "DoorSensor": DeviceType.DOOR,
-    "THSensor": DeviceType.TEMPERATURE
+    "THSensor": DeviceType.TEMPERATURE,
+    "LeakSensor": DeviceType.LEAK
 }
 
 EVENT_STATE = {
@@ -39,12 +41,14 @@ EVENT_STATE = {
 
 DEVICE_TYPE_TO_STR = {
     DeviceType.DOOR: "Door Sensor",
-    DeviceType.TEMPERATURE: "Temperature Sensor"
+    DeviceType.TEMPERATURE: "Temperature Sensor",
+    DeviceType.LEAK: "Leak Sensor"
 }
+
 
 class YoLinkDeviceApi(object):
     """
-    Object representatiaon for YoLink Device API
+    Object representation for YoLink Device API
     """
 
     def __init__(self, url, csid, csseckey):
@@ -103,7 +107,7 @@ class YoLinkDeviceApi(object):
 
 class YoLinkDevice(object):
     """
-    Object representatiaon for YoLink Device
+    Object representation for YoLink Device
     """
 
     def __init__(self, device_data):
@@ -166,7 +170,7 @@ class YoLinkDevice(object):
 
 class YoLinkDoorDevice(YoLinkDevice):
     """
-    Object representatiaon for YoLink Door Sensor
+    Object representation for YoLink Door Sensor
     """
 
     def __init__(self, device_data):
@@ -188,7 +192,7 @@ class YoLinkDoorDevice(YoLinkDevice):
 
 class YoLinkTempDevice(YoLinkDevice):
     """
-    Object representatiaon for YoLink Temperature Sensor
+    Object representation for YoLink Temperature Sensor
     """
 
     def __init__(self, device_data):
@@ -210,5 +214,25 @@ class YoLinkTempDevice(YoLinkDevice):
         to_str = ("Temperature (F): {0}\nHumidity: {1}\n").format(
             self.getTemperature(),
             self.getHumidity()
+        )
+        return super().__str__() + to_str
+
+
+class YoLinkLeakDevice(YoLinkDevice):
+    """
+    Object representation for a YoLink Leak Sensor
+    """
+    def __init__(self, device_data):
+        super().__init__(device_data)
+
+    def is_water_exhausted(self):
+        return (self.get_device_data()['state'] == 'dry')
+
+    def is_water_full(self):
+        return (self.get_device_data()['state'] == 'full')
+
+    def __str__(self):
+        to_str = ("Current State: {0}\n").format(
+            self.get_device_data()['state']
         )
         return super().__str__() + to_str

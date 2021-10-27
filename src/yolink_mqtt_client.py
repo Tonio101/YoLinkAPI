@@ -52,7 +52,7 @@ class YoLinkMQTTClient(object):
 
         deviceId = payload['deviceId']
         if deviceId in self.device_hash:
-            self.device_hash[deviceId].update_device_event_payload(payload)
+            self.device_hash[deviceId].refresh_device_data(payload)
             log.debug(self.device_hash[deviceId])
         else:
             log.debug("Device ID:{0} is not in device hash".format(deviceId))

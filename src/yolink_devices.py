@@ -14,6 +14,7 @@ class DeviceType(Enum):
     DOOR = 1
     TEMPERATURE = 2
     LEAK = 3
+    VIBRATION = 4
 
 
 class TempType(Enum):
@@ -30,7 +31,8 @@ class DoorEvent(Enum):
 DEVICE_TYPE = {
     "DoorSensor": DeviceType.DOOR,
     "THSensor": DeviceType.TEMPERATURE,
-    "LeakSensor": DeviceType.LEAK
+    "LeakSensor": DeviceType.LEAK,
+    "VibrationSensor": DeviceType.VIBRATION
 }
 
 EVENT_STATE = {
@@ -42,7 +44,8 @@ EVENT_STATE = {
 DEVICE_TYPE_TO_STR = {
     DeviceType.DOOR: "Door Sensor",
     DeviceType.TEMPERATURE: "Temperature Sensor",
-    DeviceType.LEAK: "Leak Sensor"
+    DeviceType.LEAK: "Leak Sensor",
+    DeviceType.VIBRATION: "Vibration Sensor"
 }
 
 
@@ -135,8 +138,11 @@ class YoLinkDevice(object):
     def get_token(self):
         return self.token
 
-    def update_device_event_payload(self, data):
+    def refresh_device_data(self, data):
         self.event_payload = data
+
+    def get_event_payload(self):
+        return self.event_payload
 
     def get_device_event(self):
         return self.event_payload['event']
@@ -234,5 +240,22 @@ class YoLinkLeakDevice(YoLinkDevice):
     def __str__(self):
         to_str = ("Current State: {0}\n").format(
             self.get_device_data()['state']
+        )
+        return super().__str__() + to_str
+
+
+class YoLinkVibrationDevice(YoLinkDevice):
+    """[summary]
+
+    Args:
+        YoLinkDevice ([type]): [description]
+    """
+
+    def __init__(self, device_data):
+        super().__init__(device_data)
+
+    def __str__(self):
+        to_str = ("\nVibration Event Payload: {0}\n").format(
+            self.get_event_payload()
         )
         return super().__str__() + to_str

@@ -7,8 +7,9 @@ import yaml
 
 from logger import Logger
 from logging import DEBUG
-from yolink_devices import YoLinkDeviceApi, YoLinkDoorDevice, YoLinkLeakDevice, \
-                           YoLinkTempDevice, DEVICE_TYPE, DeviceType
+from yolink_devices import YoLinkDeviceApi, YoLinkDoorDevice, \
+    YoLinkLeakDevice, YoLinkTempDevice, DeviceType, \
+    YoLinkVibrationDevice, DEVICE_TYPE
 from yolink_mqtt_client import YoLinkMQTTClient
 log = Logger.getInstance().getLogger()
 
@@ -57,6 +58,8 @@ def main(argv):
             yolink_device = YoLinkTempDevice(device_data=device_data)
         elif type == DeviceType.LEAK:
             yolink_device = YoLinkLeakDevice(device_data=device_data)
+        elif type == DeviceType.VIBRATION:
+            yolink_device = YoLinkVibrationDevice(device_data=device_data)
         else:
             raise NotImplementedError
 

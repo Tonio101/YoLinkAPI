@@ -42,5 +42,5 @@ Install python required modules:
 Add your credentials and the IoT device(s) serial number to `yolink_data.yml`.
 
 ```bash
-/usr/bin/python3 yolink.py --config yolink_data.yml
+/usr/bin/python3 yolink.py --config yolink_data.yml --debug
 ```

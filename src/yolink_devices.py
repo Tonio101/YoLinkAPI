@@ -14,6 +14,7 @@ class DeviceType(Enum):
     DOOR = 1
     TEMPERATURE = 2
     LEAK = 3
+    VIBRATION = 4
 
 
 class TempType(Enum):
@@ -30,7 +31,8 @@ class DoorEvent(Enum):
 DEVICE_TYPE = {
     "DoorSensor": DeviceType.DOOR,
     "THSensor": DeviceType.TEMPERATURE,
-    "LeakSensor": DeviceType.LEAK
+    "LeakSensor": DeviceType.LEAK,
+    "VibrationSensor": DeviceType.VIBRATION
 }
 
 EVENT_STATE = {
@@ -42,13 +44,17 @@ EVENT_STATE = {
 DEVICE_TYPE_TO_STR = {
     DeviceType.DOOR: "Door Sensor",
     DeviceType.TEMPERATURE: "Temperature Sensor",
-    DeviceType.LEAK: "Leak Sensor"
+    DeviceType.LEAK: "Leak Sensor",
+    DeviceType.VIBRATION: "Vibration Sensor"
 }
 
 
 class YoLinkDeviceApi(object):
     """
-    Object representation for YoLink Device API
+    Object representation for YoLink Device API.
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, url, csid, csseckey):
@@ -61,8 +67,12 @@ class YoLinkDeviceApi(object):
 
     def build_device_api_request_data(self, serial_number):
         """
-        Build header + payload to enable sensor API
+        Build header + payload to enable sensor API.
+
+        Args:
+            serial_number (string): Device serial number
         """
+
         self.data["method"] = 'Manage.addYoLinkDevice'
         self.data["time"] = str(int(time.time()))
         self.data["params"] = {'sn': serial_number}
@@ -80,8 +90,12 @@ class YoLinkDeviceApi(object):
 
     def enable_device_api(self):
         """
-        Send request to enable the device API
+        Send reddquest to enable the device API.
+
+        Returns:
+            dict: Device API response data.
         """
+
         response = requests.post(url=self.url,
                                  data=json.dumps(self.data),
                                  headers=self.header)
@@ -107,7 +121,10 @@ class YoLinkDeviceApi(object):
 
 class YoLinkDevice(object):
     """
-    Object representation for YoLink Device
+    Object representation for YoLink Device.
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, device_data):
@@ -135,8 +152,11 @@ class YoLinkDevice(object):
     def get_token(self):
         return self.token
 
-    def update_device_event_payload(self, data):
+    def refresh_device_data(self, data):
         self.event_payload = data
+
+    def get_event_payload(self):
+        return self.event_payload
 
     def get_device_event(self):
         return self.event_payload['event']
@@ -170,7 +190,10 @@ class YoLinkDevice(object):
 
 class YoLinkDoorDevice(YoLinkDevice):
     """
-    Object representation for YoLink Door Sensor
+    Object representation for YoLink Door Sensor.
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, device_data):
@@ -193,6 +216,9 @@ class YoLinkDoorDevice(YoLinkDevice):
 class YoLinkTempDevice(YoLinkDevice):
     """
     Object representation for YoLink Temperature Sensor
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, device_data):
@@ -220,8 +246,12 @@ class YoLinkTempDevice(YoLinkDevice):
 
 class YoLinkLeakDevice(YoLinkDevice):
     """
-    Object representation for a YoLink Leak Sensor
+    Object representation for a YoLink Leak Sensor.
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
+
     def __init__(self, device_data):
         super().__init__(device_data)
 
@@ -234,5 +264,26 @@ class YoLinkLeakDevice(YoLinkDevice):
     def __str__(self):
         to_str = ("Current State: {0}\n").format(
             self.get_device_data()['state']
+        )
+        return super().__str__() + to_str
+
+
+class YoLinkVibrationDevice(YoLinkDevice):
+    """
+    Object representation for a YoLink Vibration Sensor.
+
+    Args:
+        YoLinkDevice (object): Parent object
+    """
+
+    def __init__(self, device_data):
+        super().__init__(device_data)
+
+    def is_vibrating(self):
+        return (self.get_device_data()['state'] == 'alert')
+
+    def __str__(self):
+        to_str = ("\Event Payload: {0}\n").format(
+            self.get_event_payload()
         )
         return super().__str__() + to_str

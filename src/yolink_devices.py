@@ -51,7 +51,10 @@ DEVICE_TYPE_TO_STR = {
 
 class YoLinkDeviceApi(object):
     """
-    Object representation for YoLink Device API
+    Object representation for YoLink Device API.
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, url, csid, csseckey):
@@ -64,8 +67,12 @@ class YoLinkDeviceApi(object):
 
     def build_device_api_request_data(self, serial_number):
         """
-        Build header + payload to enable sensor API
+        Build header + payload to enable sensor API.
+
+        Args:
+            serial_number (string): Device serial number
         """
+
         self.data["method"] = 'Manage.addYoLinkDevice'
         self.data["time"] = str(int(time.time()))
         self.data["params"] = {'sn': serial_number}
@@ -83,8 +90,12 @@ class YoLinkDeviceApi(object):
 
     def enable_device_api(self):
         """
-        Send request to enable the device API
+        Send reddquest to enable the device API.
+
+        Returns:
+            dict: Device API response data.
         """
+
         response = requests.post(url=self.url,
                                  data=json.dumps(self.data),
                                  headers=self.header)
@@ -110,7 +121,10 @@ class YoLinkDeviceApi(object):
 
 class YoLinkDevice(object):
     """
-    Object representation for YoLink Device
+    Object representation for YoLink Device.
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, device_data):
@@ -176,7 +190,10 @@ class YoLinkDevice(object):
 
 class YoLinkDoorDevice(YoLinkDevice):
     """
-    Object representation for YoLink Door Sensor
+    Object representation for YoLink Door Sensor.
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, device_data):
@@ -199,6 +216,9 @@ class YoLinkDoorDevice(YoLinkDevice):
 class YoLinkTempDevice(YoLinkDevice):
     """
     Object representation for YoLink Temperature Sensor
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, device_data):
@@ -226,8 +246,12 @@ class YoLinkTempDevice(YoLinkDevice):
 
 class YoLinkLeakDevice(YoLinkDevice):
     """
-    Object representation for a YoLink Leak Sensor
+    Object representation for a YoLink Leak Sensor.
+
+    Args:
+        YoLinkDevice (object): Parent object
     """
+
     def __init__(self, device_data):
         super().__init__(device_data)
 
@@ -245,17 +269,21 @@ class YoLinkLeakDevice(YoLinkDevice):
 
 
 class YoLinkVibrationDevice(YoLinkDevice):
-    """[summary]
+    """
+    Object representation for a YoLink Vibration Sensor.
 
     Args:
-        YoLinkDevice ([type]): [description]
+        YoLinkDevice (object): Parent object
     """
 
     def __init__(self, device_data):
         super().__init__(device_data)
 
+    def is_vibrating(self):
+        return (self.get_device_data()['state'] == 'alert')
+
     def __str__(self):
-        to_str = ("\nVibration Event Payload: {0}\n").format(
+        to_str = ("\Event Payload: {0}\n").format(
             self.get_event_payload()
         )
         return super().__str__() + to_str
